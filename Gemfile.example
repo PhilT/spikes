@@ -1,0 +1,35 @@
+# Example Gemfile
+
+source :rubygems
+
+gem 'activemodel'
+gem 'airbrake_notifier'               # error logging/notification
+gem 'capistrano'                      # deployment
+gem 'carrierwave'                     # file uploads
+gem 'delayed_job'                     # scheduling
+gem 'datamapper'                      # DataMapper
+gem 'devise'                          # authentication
+gem 'dm-active_model'                 # ActiveModel style queries with DataMapper
+gem 'dm-is-list'
+gem 'dm-is-state_machine'
+gem 'dm-sqlite-adapter'
+gem 'dm-mysql-adapter'
+gem 'formtastic'                      # HTML forms
+gem 'friendly_id'                     # slugs
+gem 'haml'                            # templating
+gem 'passenger'                       # web server
+gem 'renee'                           # Rack/Routing
+gem 'sass'                            # stylesheets
+gem 'shotgun'                         #
+gem 'simple-navigation'               # menus/breadcrumbs
+gem 'sprokets'                        # Asset packaging (JS, Sass)
+gem 'whenever'                        # scheduling
+gem 'with_action'                     # multi-button forms
+
+group :development, :test do
+  gem 'capybara'                      # Web testing
+  gem 'factory_girl'                  # DB Factories
+  gem 'guard'                         # Continuous testing
+  gem 'minitest'                      # Specing/Testing
+end
+

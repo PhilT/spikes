@@ -1,0 +1,11 @@
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect("http://localhost");
+  socket.on('sales', function (data) {
+    //Update your dashboard gauge
+    salesGauge.setValue(data.value);
+
+    socket.emit('profit', { my: 'data' });
+  });
+</script>
+

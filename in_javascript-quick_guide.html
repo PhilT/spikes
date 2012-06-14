@@ -1,0 +1,510 @@
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>In JavaScript</title>
+    <style type="text/css" media="screen">
+    /* <![CDATA[ */
+        body { font-size: 16px; font-family: Tahoma, Geneva, sans-serif }
+        h2, h3, h4 { margin-bottom: 0px; padding-bottom: 0px; }
+    /* ]]> */
+    </style>
+
+  </head>
+  <body>
+    <h1>In JavaScript</h1>
+    <h4>A quick guide written in Javascript. (View source to see the code)</h4>
+    <script>
+      var print = function(line, newline) {
+        if (!line) { line = ''}
+        if (newline) { line += '<br/>' }
+        document.writeln(line)
+      }
+
+      var puts = function(line) {
+        print(line, true)
+      }
+
+      var heading = function(title) {
+        puts('<h2>' + title + '</h2>')
+      }
+
+      var subheading = function(title) {
+        puts('<h3>' + title + '</h3>')
+      }
+
+      // Line comment
+      /* Block comment. Avoid using with regex's
+      */
+
+      // Reserved words:
+      // -----------------------------------------
+      // abstract boolean break byte case catch char class const continue debugger default delete do double else enum
+      // export extends false final finally float for function goto if implements import in instanceof int interface
+      // long native new null package private protected public return short static super switch synchronized
+      // this throw throws transient true try typeof var volatile void while with
+
+      heading('Strings')
+      puts('Single quoted string')
+      puts("Double quoted string")
+      puts('Escape with back slash (\\) e.g. \\n for newline')
+      var hello = 'Hello'
+      puts('Strings have a <code>length</code> property. ' + hello + ' has a length of <strong>' + hello.length + '</strong>')
+      puts('Strings have methods e.g. <code>"' + hello + '".toUpperCase()</code>. -> ' + hello.toUpperCase())
+
+      heading('Numbers')
+      puts('No separate integer type exists.')
+      if (1 == 1.0) {
+        puts('So: 1 == 1.0')
+      }
+
+      print('And does 1 === 1.0?')
+      if (1 === 1.0){
+        puts('It does!')
+      }
+
+      puts("1 + '2' => " + (1 + '2'))
+      puts("whereas 1 + 2 => " + (1 + 2))
+
+      puts('Parsing numbers: ')
+      puts("0 prefix sets radix to 8 so parseInt('08') produces " + parseInt('08').toString())
+      puts("To get the expected result set radix to 10 as in parseInt('08', 10) => " + parseInt('08', 10))
+
+      puts('Floating point numbers do not behave as you would expect:')
+      puts('0.1 + 0.2 => ' + (0.1 + 0.2) + ' (not 0.3)')
+      puts('Use scaling to work around this e.g. ((0.1 * 10) + (0.2 * 10)) / 10 => ' + (((0.1 * 10) + (0.2 * 10)) / 10))
+      puts()
+
+      puts('Testing for a number')
+      var nan = NaN
+      puts(nan === NaN || 'NaN not equal to NaN!')
+      puts(!isNaN(Infinity) && 'Thinks Infinity is a number')
+      puts(isFinite('0') && "Thinks '0' is a number")
+      puts()
+
+      puts('With the isNumber function:')
+      var isNumber = function(value) {
+        return typeof value === 'number' && isFinite(value)
+      }
+      puts(isNumber(NaN) || 'NaN is not a number')
+      puts(isNumber(Infinity) || 'Infinity is not a number')
+      puts(isNumber('0') || "'0' is not a number")
+      puts(isNumber(0) && '0 is a number')
+
+      heading('Variables')
+      global_var = false // Implictly assigned global. Do not do this.
+      var myFunc = function() {
+        var local_var = true // Locally defined and assigned variable.
+        // ...
+        return 'something'
+      }
+
+      if (!false || !null || !undefined || !'' || !0 || !NaN) {
+       puts('false, null, undefined, "", 0, NaN are all falsy when used by <code>if</code>')
+      }
+
+      puts('Array has a length property: ' + [].hasOwnProperty('length')) // true
+      puts('Object has a length property: ' + {}.hasOwnProperty('length')) // false
+
+      heading('Looping')
+      var waiting = true
+      while(waiting){
+        puts('Waiting...')
+        waiting = false
+      }
+      puts('Finished waiting.')
+
+      for(var i = 0; i < 5; i ++) {
+        print(i + ' ')
+      }
+      puts()
+
+      var obj = {key: 'value', method: function() { puts('do stuff') } } // Object literal notation
+      puts('Display only data:')
+      for(var myvar in obj) {
+        if (typeof myvar !== 'function') {
+          puts(myvar + ' => ' + obj[myvar])
+        }
+      }
+      delete obj.key
+
+      do {
+        puts('Does this once')
+        break // Exit early
+      }
+      while(true) // This will never get executed
+
+      heading('Exceptions')
+
+      try {
+        print('This will throw')
+        throw 'thrown'
+      }
+      catch(e) {
+        puts('but we handle what was ' + e)
+      }
+
+      heading('Object Literal')
+      var empty_object = {}
+      var person = {
+        'first-name': 'Phil',
+        last_name: 'Thompson',
+        address: {
+          first_line: 'A road in',
+          town: 'London'
+        }
+      }
+
+      puts('Hello ' + person['first-name'] + ' ' + person.last_name)
+      print('Address: ')
+      for(var field in person.address) {
+       print(person.address[field] + ' ')
+      }
+      puts()
+
+      heading('Prototypal Inheritance')
+      if (typeof Object.create !== 'function') {
+        Object.create = function (original) {
+          var F = function () {}
+          F.prototype = original
+          return new F()
+        }
+      }
+
+      person_with_extras = Object.create(person) // person is an object literal defined above
+      person_with_extras.sex = 'male'
+      print('This comes from person: ')
+      puts(person_with_extras.last_name)
+      print('This, from person_with_extras: ')
+      puts(person_with_extras.sex)
+      person_with_extras.get_name = function() {
+        return this['first-name'] + ' ' + this.last_name
+      }
+      print('Method added to person_with_extras (get_name()): ')
+      puts(person_with_extras.get_name())
+
+      heading('Function literal')
+      // Why do we need function literals? To create closures, modules, objects etc?
+      print('A function literal ')
+      var functionLiteral = function() {
+        puts('<strong>does stuff</strong>')
+      }
+      functionLiteral()
+
+      heading('Closures')
+      var fade = function(node) {
+        var level = 6
+        node.style.backgroundColor = '#ffff66'
+        var step = function() {
+          var hex = level.toString(16)
+          node.style.backgroundColor = '#ffff' + hex + hex
+          if (level < 15) {
+            level += 1
+            setTimeout(step, 100)
+          }
+        }
+
+        setTimeout(step, 2000)
+      }
+      fade(document.body)
+
+      var closure = (function() {
+        var value = 0
+
+        return {
+          increment: function(inc) {
+            value += typeof inc === 'number' ? inc : 1
+          },
+          getValue: function() {
+            return value
+          }
+        }
+      }())
+
+      // Callbacks
+      //sending async requests
+      //(AJAX)
+
+      heading('Module pattern')
+      // How is this the module pattern?
+      Function.prototype.method = function(name, func) {
+        this.prototype[name] = func
+        return this
+      }
+
+      // Still don't understand benefits
+      String.method('deentityify', function(){
+        var entity = {
+          quot: '"',
+          lt: '<',
+          gt: '>'
+        }
+
+        return function(){
+          return this.replace(/&([^&;]+);/g, function(a, b){
+            var r = entity[b]
+            return typeof r === 'string' ? r : a
+          })
+        }
+      }())
+
+      heading('Secure object')
+      var serial_maker = function() {
+        var prefix = '' //This is private
+        var seq = 0     //This is private
+        return {
+          set_prefix: function(p){
+            prefix = String(p)
+          },
+          set_seq: function(s){
+            seq = s
+          },
+          gensym: function(){
+            var result = prefix + seq
+            seq += 1
+            return result
+          }
+        }
+      }
+
+      var seqer = serial_maker()
+      seqer.set_prefix('Q')
+      seqer.set_seq(1000)
+      puts(seqer.gensym())
+      puts(seqer.gensym())
+      if (seqer.prefix === undefined){
+        puts('seqer.prefix is inacessible')
+      }
+
+      heading('Cascade (chaining)')
+      var cascade = function() {
+        var color
+        var size
+        return {
+          set_color: function(c) {
+            color = c
+            return this
+          },
+          set_size: function(s) {
+            size = s
+            return this
+          },
+          about: function() {
+            return "It's " + size + ' and ' + color
+          }
+        }
+      }
+
+      var cas = cascade()
+      puts(cas.set_color('blue').set_size('big').about())
+
+      // Curry - Why?
+
+      heading('Memoization')
+      var memoizer = function(memo, formula) {
+        var recur = function(n) {
+          var result = memo[n]
+          if (typeof result !== 'number') {
+            result = formula(recur, n)
+            memo[n] = result
+          }
+          return result
+        }
+        return recur
+      }
+
+      var fibonacci = memoizer([0, 1],
+        function (recur, n) {
+          return recur(n - 1) + recur(n - 2)
+        }
+      )
+
+      puts('Fibonacci numbers 0 to 9')
+      for (var i = 0; i < 10; i ++) {
+        print(fibonacci(i) + ' ')
+      }
+      puts()
+
+      heading('Functional Inheritance')
+      puts('Classical Inheritance is not what Javascript was designed for.')
+      puts('Using <code>new</code> is not recommended. Refer to Javascript: The Good Parts for a detailed explanation of why.')
+      puts('Functional Inheritance uses the module pattern to hide member variables.')
+
+      // syntax
+      var hidingProperties = function() {
+        var that = {}
+        that.method = function() {}
+        return that
+      }
+      //
+
+      // For example:
+      var originalThing = function(spec) {
+        var that = {}
+
+        that.get_name = function() {
+          return spec.name
+        }
+
+        that.says = function() {
+          return spec.saying || ''
+        }
+
+        return that
+      }
+
+      var myThing = originalThing({name: 'Thing'})
+
+      var specificThing = function(spec) {
+        spec.saying = spec.saying || 'hello'
+        var that = originalThing(spec)
+        that.something_specific = function() {
+          //...
+        }
+        that.get_name = function() {
+          return that.says() + ' ' + spec.name
+        }
+        return that
+      }
+
+      var mySpecificThing = specificThing({name: 'Specific Thing'})
+      puts('My ' + myThing.get_name())
+      puts('My ' + mySpecificThing.get_name())
+
+      print('Create a super method that calls the original method: ')
+      //super is a reserved word so we use supa instead:
+      Object.method('supa', function(name) {
+        var that = this
+        var method = that[name]
+        return function() {
+          return method.apply(that, arguments)
+        }
+      })
+
+      var verySpecificThing = function(spec) {
+        var that = specificThing(spec)
+        var super_get_name = that.supa('get_name')
+        that.get_name = function(n) {
+          return 'like ' + super_get_name()
+        }
+        return that
+      }
+      var myVerySpecificThing = verySpecificThing({name: 'Joe'})
+      puts(myVerySpecificThing.get_name())
+
+      heading('Composition')
+      var events = function(that) {
+        var registry = {}
+        that.fire = function(event) {
+          var array, func, handler, i
+          var type = typeof event === 'string' ? event : event.type
+
+          if (registry.hasOwnProperty(type)) {
+            array = registry[type]
+            for (i = 0; i < array.length; i += 1) {
+              handler = array[i]
+              func = handler.method
+              if (typeof func === 'string') {
+                func = this[func]
+              }
+
+              func.apply(this, handler.parameters || [event])
+            }
+          }
+          return this
+        }
+        that.on = function(type, method,  parameters) {
+          var handler = {
+            method: method,
+            parameters: parameters
+          }
+          if (registry.hasOwnProperty(type)) {
+            registry[type].push(handler)
+          }
+          else {
+            registry[type] = [handler]
+          }
+          return this
+        }
+        return that
+      }
+
+      heading('Arrays')
+      var array = ['a', 'b', 'c']
+      array.length = 2
+      puts(array) // a, b
+      array.push('d')
+      puts(array) // a, b, d
+      delete array[1]
+      puts(array) // a, undefined, d
+      array = ['w', 'x', 'y', 'z']
+      array.splice(1, 2)
+      puts(array) // w, z
+      array.length = 5
+      puts('Array length is ' + array.length) // 5
+
+      var i
+      print('Iterate array: ')
+      for (i = 0; i < array.length; i ++) {
+        print(i + ': ' + array[i] + ', ') // w z
+      }
+      puts()
+
+      puts('')
+      print('Iterate all properties of array: ')
+      for (i in array) {
+        print(array[i]) // w z function (name) { ... }
+      }
+      puts('')
+
+
+      Array.method('reject', function(expr, invert) {
+        var i
+        for (i = 0; i < this.length; i ++) {
+          passed = expr(this[i])
+          if (invert) { passed = !passed }
+          if (passed) {
+            this.splice(i, 1)
+          }
+        }
+      })
+
+      array = ['a', 'b', 'a', 'c']
+      array.reject(function(element) { return element == 'a' })
+      puts(array) // b, c
+
+      Array.method('map', function(expr) {
+        this.reject(expr, true)
+      })
+
+      array = ['a', 'b', 'a', 'c']
+      array.map(function(element) { return element == 'a' })
+      puts(array) // a, a
+
+      heading('Regular Expressions')
+      function test_regex(param) {
+        puts(param + (number_regex.test(param) ? ' is a number.' : ' is not a number.'))
+      }
+
+      puts('Test using regexp literal (/.../)')
+      var number_regex = /^-?(\d*)\.?(\d*)$/
+      test_regex('1') // true
+      test_regex('mmm') // false
+      test_regex('1.1') // true
+      test_regex('.1') // true
+      test_regex('1.') // true
+      test_regex('1234abc') // true
+      var parts = number_regex.exec('1.23')
+      puts('Matched: ' + parts[0])
+      puts('Whole numbers: ' + parts[1])
+      puts('Fractional part: ' + parts[2] )
+      puts()
+
+      puts('Test using RegExp constructor')
+      number_regex = new RegExp('^-?\\d+')
+      test_regex('1') // true
+      test_regex('mmm') // false
+      test_regex('1.1') // true
+    </script>
+  </body>
+</html>
+
