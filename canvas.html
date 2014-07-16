@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Canvas test</title>
+  <style type="text/css">body {margin: 0; padding: 0; overflow: hidden;}</style>
+  <script type="text/javascript">
+    var readyId = setInterval(function() {
+      if (document.readyState === "complete") {
+        init()
+        clearInterval(readyId)
+      }
+    }, 10)
+
+/*    function draw() {
+      var canvas = document.getElementById('canvas')
+      if (canvas.getContext) {
+        var ctx = canvas.getContext('2d')
+        for (var i = 0; i < 10; i++) {
+          ctx.fillStyle = "rgba(200, 150, 0, 0.9)"
+          ctx.strokeStyle = "rgba(200, 150, 0, 0.9)"
+          ctx.fillRect(100 + i * 4, 100 + i, 10, 10)
+
+          ctx.beginPath()
+          ctx.arc(150 + i * 4, 100 + i, 5, 0, Math.PI * 2)
+          ctx.fill()
+        };
+
+        gradient = ctx.createRadialGradient(200, 200, 5, 200, 200, 25)
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 1)')
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
+
+        ctx.fillStyle = gradient
+        ctx.fillRect(0, 0, 300, 300)
+      } else {
+        alert('Your browser does not support canvas. Please upgrade.')
+      }
+    }
+    */
+    function rgbaToString(r, g, b, a) {
+      return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')'
+    }
+
+    function drawGlowLine(ctx) {
+      ctx.strokeStyle = rgbaToString(255, 255, 0, 1)
+      ctx.beginPath()
+      ctx.moveTo(5, 5)
+      ctx.lineTo(100, 5)
+      ctx.stroke()
+
+      gradient = ctx.createLinearGradient(0, 0, 0, 10)
+      gradient.addColorStop(0, rgbaToString(255, 255, 0, 0))
+      gradient.addColorStop(0.5, rgbaToString(255, 255, 0, 0.4))
+      gradient.addColorStop(1, rgbaToString(255, 255, 0, 0))
+      ctx.fillStyle = gradient
+      ctx.fillRect(3, 0, 99, 10)
+    }
+/*
+    function draw() {
+      var canvas = document.createElement('canvas')
+      canvas.width = document.width
+      canvas.height = document.height
+      document.body.appendChild(canvas)
+      if (canvas.getContext) {
+        var ctx = canvas.getContext('2d')
+
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.translate(100, 100)
+
+        drawGlowLine(ctx)
+
+        ctx.translate(10, -40)
+        ctx.rotate(45 * Math.PI / 180)
+        drawGlowLine(ctx)
+      }
+    }
+
+*/
+    function newDirection(other) {
+      var delta = 0
+      do {
+        delta = (Math.random() * 10 - 5)
+      } while(delta == 0 && other == 0)
+      return delta
+    }
+
+    function angle() {
+      return Math.round(Math.random() * 360)
+    }
+
+    function randColor() {
+      return Math.floor(Math.random() * 255)
+    }
+
+    function generateColor() {
+      return rgbaToString(randColor(), 0, 100, Math.random())
+    }
+
+    function randFade() {
+      return Math.random() / 300 + 0.005
+    }
+
+    var COUNT = 4000
+    var FPS = 60
+    var objects = []
+    var canvas, ctx
+    var timings = []
+    var fps
+    var board = {
+      draw: function() {
+        ctx.save()
+        ctx.fillStyle = '#000'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+/*        ctx.strokeStyle = '#223'
+        for (var y = 0; y < canvas.height; y += 50) {
+          for (var x = 0; x < canvas.width; x += 50) {
+            ctx.strokeRect(x, y, 100, 100)
+          }
+        }*/
+        ctx.restore()
+      }
+    }
+
+    function createObj() {
+      var xi = newDirection()
+      var yi = newDirection(xi)
+      var rr = 0
+      if (Math.round(Math.random()) == 1) {
+        rr = newDirection()
+      }
+      objects.push({
+        color: 1,
+        fade: randFade(),
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        xi: xi,
+        yi: yi,
+        rotation: angle(),
+        rr: rr
+      })
+    }
+
+    function init() {
+      canvas = document.createElement('canvas')
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      document.body.appendChild(canvas)
+      if (canvas.getContext) {
+        ctx = canvas.getContext('2d')
+
+        var timer = setInterval(runLoop, 1000 / FPS)
+
+        document.onkeydown = function(event) {
+          if (event.keyCode == 27) {
+            if (timer != null) {
+              clearInterval(timer)
+              timer = null
+            } else {
+              timer = setInterval(runLoop, 1000 / FPS)
+            }
+          }
+        }
+      }
+    }
+
+    function runLoop() {
+      timings.push(new Date())
+      if (timings.length > 120) timings.shift()
+      average = 0
+      for (var i = 1; i < timings.length; i++) {
+        average += timings[i] - timings[i - 1]
+      }
+      average = average / timings.length
+      board.draw()
+      update(objects, canvas, ctx)
+      draw(objects, canvas, ctx)
+    }
+
+    function update(objects, canvas, ctx) {
+      if (objects.length < COUNT) {
+        var toAdd = Math.random() * 50
+        for (var i = 0; i < toAdd; i++) {
+          createObj()
+        };
+      }
+
+      for (var i = 0; i < objects.length; i++) {
+        obj = objects[i]
+
+        obj.x += obj.xi
+        obj.y += obj.yi
+        obj.rotation += obj.rr
+        obj.color -= obj.fade
+
+        if (obj.color < 0) {
+          objects.splice(i, 1)
+        }
+
+/*        if (obj.x > canvas.width - 20 || obj.x < 10) {
+          obj.xi = obj.xi * -1
+          obj.yi = newDirection(obj.xi)
+          obj.color = generateColor()
+        } else if (obj.y > canvas.height - 10 || obj.y < 10) {
+          obj.yi = obj.yi * -1
+          obj.xi = newDirection(obj.yi)
+          obj.color = generateColor()
+          if (Math.round(Math.random()) == 1) {
+            obj.rr = newDirection()
+          } else {
+            obj.rr = 0
+          }
+        } */
+      }
+    }
+
+    function draw(objects, canvas, ctx) {
+      for (var i = 0; i < objects.length; i++) {
+        obj = objects[i]
+        ctx.save()
+        ctx.translate(obj.x, obj.y)
+//        ctx.rotate(obj.rotation * Math.PI / 180)
+
+
+/*
+        ctx.strokeStyle = rgbaToString(255, 240, 0, obj.color / 3)
+        ctx.lineWidth = 3
+        ctx.lineCap = 'round'
+        ctx.beginPath()
+        ctx.moveTo(0, 0)
+        ctx.lineTo(obj.xi * 5, obj.yi * 5)
+        ctx.stroke()
+*/
+        ctx.strokeStyle = rgbaToString(0, 250, 30, obj.color)
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(0, 0)
+        ctx.lineTo(obj.xi * 5, obj.yi * 5)
+        ctx.stroke()
+
+        ctx.restore()
+      }
+      ctx.fillStyle = '#ddd'
+      ctx.font = '15px Arial'
+      ctx.fillText('FPS: ' + Math.round(1000 / average).toString() + '  OBJECTS: ' + objects.length.toString(), 0, canvas.height - 5)
+    }
+  </script>
+</head>
+<body>
+</body>
+</html>
