@@ -1,0 +1,168 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <title>Facebook_photos</title>
+    <script type="text/javascript" charset="utf-8">
+      var checkLoginState,
+          fetchAlbums,
+          fetchPhotos,
+          showAlbums,
+          showPhotos,
+          albumSection,
+          photoSection,
+          openPhoto;
+
+      fetchAlbums = function fetchAlbums(albums) {
+        var ul = albumSection.getElementsByTagName('ul')[0],
+            li;
+
+        albums.forEach(function(album) {
+          li = document.createElement('li');
+          li.id = album.id;
+          li.innerHTML = album.name;
+          li.addEventListener('click', function() { fetchPhotos(album); });
+          ul.appendChild(li);
+
+          FB.api(album.cover_photo + '?fields=album,picture', function (response) {
+            var li,
+                img;
+
+            if(response && !response.error) {
+              li = document.getElementById(response.album.id);
+              img = document.createElement('img');
+              img.src = response.picture;
+              li.insertBefore(img, li.firstChild);
+            }
+          });
+        });
+      };
+
+      fetchPhotos = function fetchPhotos(album) {
+        var ul = photoSection.getElementsByTagName('ul')[0];
+        ul.innerHTML = '';
+
+        photoSection.getElementsByTagName('h3')[0].innerHTML = album.name;
+        FB.api(album.id + '/photos', function(response) {
+          var li, img;
+
+          if(response && !response.error) {
+            response.data.forEach(function(photo) {
+              li = document.createElement('li');
+              li.id = photo.id;
+
+              img = document.createElement('img');
+              img.src = photo.picture;
+              li.addEventListener('click', function () { openPhoto(photo) });
+              li.appendChild(img);
+              ul.appendChild(li);
+            });
+          }
+        });
+        showPhotos();
+      };
+
+      showAlbums = function showAlbums() {
+        albumSection.style.display = 'block';
+        photoSection.style.display = 'none';
+      };
+
+      showPhotos = function showPhotos() {
+        albumSection.style.display = 'none';
+        photoSection.style.display = 'block';
+      };
+
+      openPhoto = function openPhoto(photo) {
+        var canvas = document.getElementsByTagName('canvas')[0],
+            context = canvas.getContext('2d'),
+            reader = new FileReader(),
+            image = new Image();
+
+        image.onload = function() {
+          canvas.width = 200;
+          canvas.height = 200;
+          context.drawImage(image, 0, 0, 200, photo.height / photo.width * 200);
+        };
+        image.src = photo.source;
+      };
+
+      checkLoginState = function checkLoginState() {
+        albumSection = document.getElementById('albums'),
+        photoSection = document.getElementById('photos');
+        document.getElementById('to_albums').addEventListener('click', showAlbums);
+        FB.getLoginStatus(function(response) {
+          if (response.status === 'connected') {
+            FB.api('/me/albums', function(response) {
+              if(response && !response.error) {
+                fetchAlbums(response.data);
+              }
+            });
+          }
+        });
+      };
+
+    </script>
+    <style type="text/css" media="screen">
+      body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+      ul { list-style-type: none; }
+      li {
+        float: left;
+        margin: 5px;
+        font-size: 75%;
+        color: #444;
+        width: 100px;
+        border: 1px solid #ddd;
+        cursor: pointer;
+      }
+      li img { width: 100px; float: left; }
+      #photos { display: none; }
+      .heading { color: #444; }
+
+    </style>
+  </head>
+<body>
+  <div id="fb-root"></div>
+  <script type="text/javascript" charset="utf-8">
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '329939637198014',
+        cookie     : true,  // enable cookies to allow the server to access
+                            // the session
+        xfbml      : true,  // parse social plugins on this page
+        version    : 'v2.2' // use version 2.1
+      });
+
+    };
+
+    (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script>
+  <fb:login-button scope="public_profile,email,user_photos" onlogin="checkLoginState();">
+  </fb:login-button>
+
+  <h2 class='heading'>Choose a photo from your albums</h2>
+
+  <section id='albums'>
+    <h3 class='heading'>Albums</h3>
+    <ul>
+    </ul>
+  </section>
+
+  <section id='photos'>
+    <a id='to_albums' href='#'>Back to albums</a>
+    <h3 class='heading'></h3>
+    <ul>
+    </ul>
+  </section>
+
+  <canvas>
+  </canvas>
+</body>
+</html>
+

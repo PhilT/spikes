@@ -13,10 +13,10 @@
       var loader = document.querySelector('input[type="file"]'),
           canvas = document.querySelector('canvas'),
           context = canvas.getContext('2d'),
+          reader = new FileReader(),
           handleImage;
 
       handleImage = function handleImage(e) {
-        var reader = new FileReader();
         reader.onload = function(event) {
           var img = new Image();
           img.onload = function() {
@@ -25,6 +25,7 @@
             context.drawImage(img, 0, 0);
           };
           img.src = event.target.result;
+          console.log(event.target);
         };
         reader.readAsDataURL(e.target.files[0]);
       };
